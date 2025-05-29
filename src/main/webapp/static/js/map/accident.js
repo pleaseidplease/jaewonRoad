@@ -22,6 +22,7 @@ let accidentVisible = false;
 // 4. 사고 버튼 이벤트 등록
 document.getElementById("toggle-accident").addEventListener("click", function () {
   const btn = this;
+  const label = btn.querySelector(".btn-label");
 
   if (!accidentVisible) {
     // 🚧 마커 추가
@@ -61,7 +62,7 @@ document.getElementById("toggle-accident").addEventListener("click", function ()
         });
 
         accidentVisible = true;
-        btn.textContent = "사고 숨기기";  
+        label.textContent = "사고";
         btn.classList.add("active");      
         console.log(`🚧 사고 ${accidentMarkers.length}건 표시됨`);
       })
@@ -75,7 +76,7 @@ document.getElementById("toggle-accident").addEventListener("click", function ()
     accidentMarkers.forEach(marker => map.removeLayer(marker));
     accidentMarkers = [];
     accidentVisible = false;
-    btn.textContent = "사고 보기";
+    label.textContent = "사고";
     btn.classList.remove("active");
     console.log("🚧 사고 마커 제거됨");
   }
