@@ -13,53 +13,37 @@ L.tileLayer('https://api.vworld.kr/req/wmts/1.0.0/3526DC75-E395-3B90-B026-E66AAC
     maxZoom: 19
 }).addTo(map);
 
-// 3. 줌레벨별 WMS 레이어 정의
-var wmsZ1 = L.tileLayer.wms('http://localhost:8080/geoserver/jaewon/wms', {
-    layers: 'jaewon:JAWON_SHP',
-    styles: 'JAEWON_STYLE',
-    format: 'image/png',
-    transparent: true,
-    version: '1.1.1',
-    tiled: true
-});
 
-var wmsZ2 = L.tileLayer.wms('http://localhost:8080/geoserver/jaewon/wms', {
-    layers: 'jaewon:JAWON_SHP',
-    styles: 'JAEWON_STYLE',
-    format: 'image/png',
-    transparent: true,
-    version: '1.1.1',
-    tiled: true
-});
+// WMS 레이어 정보 비동기 로딩
+fetch('/api/geoserver/layer-info')
+  .then(response => response.json())
+  .then(data => {
+    const baseUrl = `${data.url}/${data.workspace}/wms`;
+    const layerOptions = {
+      layers: `${data.workspace}:${data.layerName}`,
+      styles: data.style,
+      format: 'image/png',
+      transparent: true,
+      version: '1.1.1',
+      tiled: true
+    };
 
-var wmsZ3 = L.tileLayer.wms('http://localhost:8080/geoserver/jaewon/wms', {
-    layers: 'jaewon:JAWON_SHP',
-    styles: 'JAEWON_STYLE',
-    format: 'image/png',
-    transparent: true,
-    version: '1.1.1',
-    tiled: true
-});
+    // 줌별 레이어
+    var wmsZ1 = L.tileLayer.wms(baseUrl, layerOptions);
+    var wmsZ2 = L.tileLayer.wms(baseUrl, layerOptions);
+    var wmsZ3 = L.tileLayer.wms(baseUrl, layerOptions);
 
-// 4. 줌 이벤트에 따라 WMS 레이어 업데이트
-function updateWMSLayer() {
-    // 모두 제거 후
-    map.removeLayer(wmsZ1);
-    map.removeLayer(wmsZ2);
-    map.removeLayer(wmsZ3);
-
-    // 줌값에 따라 추가
-    var zoom = map.getZoom();
-    if (zoom >= 7 && zoom <= 9) {
-        map.addLayer(wmsZ1);
-    } else if (zoom >= 10 && zoom <= 11) {
-        map.addLayer(wmsZ2);
-    } else if (zoom >= 12 && zoom <= 13) {
-        map.addLayer(wmsZ3);
+    function updateWMSLayer() {
+      map.removeLayer(wmsZ1);
+      map.removeLayer(wmsZ2);
+      map.removeLayer(wmsZ3);
+      var zoom = map.getZoom();
+      if (zoom >= 7 && zoom <= 9) map.addLayer(wmsZ1);
+      else if (zoom >= 10 && zoom <= 11) map.addLayer(wmsZ2);
+      else if (zoom >= 12 && zoom <= 13) map.addLayer(wmsZ3);
     }
-}
 
-map.on('zoomend', updateWMSLayer);
-updateWMSLayer(); // 초기화 시 호출
-
+    map.on('zoomend', updateWMSLayer);
+    updateWMSLayer(); // 초기 실행
+  });
 
